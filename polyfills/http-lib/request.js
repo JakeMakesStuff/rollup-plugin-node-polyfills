@@ -150,6 +150,9 @@ ClientRequest.prototype._onFinish = function() {
       self.emit('error', reason)
     })
   } else {
+    if (!global.XMLHttpRequest) {
+      throw new Error('JavaScript environment does not support XMLHttpRequest')
+    }
     var xhr = self._xhr = new global.XMLHttpRequest()
     try {
       xhr.open(self._opts.method, self._opts.url, true)

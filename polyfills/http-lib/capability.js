@@ -36,13 +36,19 @@ function checkTypeSupport(type) {
 var haveArrayBuffer = typeof global.ArrayBuffer !== 'undefined'
 var haveSlice = haveArrayBuffer && isFunction(global.ArrayBuffer.prototype.slice)
 
-export var arraybuffer = haveArrayBuffer && checkTypeSupport('arraybuffer')
+// For the exports, we want to check that XHR is accessible. If it isn't, do not run
+// the tests since some browser-like environments (for example: Cloudflare Workers) have
+// them off. It is pretty safe to ignore everything under this anyway if this is undefined
+// since only fetch will work.
+var haveXhr = typeof global.XMLHttpRequest !== 'undefined'
+
+export var arraybuffer =  haveXhr && haveArrayBuffer && checkTypeSupport('arraybuffer')
   // These next two tests unavoidably show warnings in Chrome. Since fetch will always
   // be used if it's available, just return false for these to avoid the warnings.
-export var msstream = !hasFetch && haveSlice && checkTypeSupport('ms-stream')
-export var mozchunkedarraybuffer = !hasFetch && haveArrayBuffer &&
+export var msstream = haveXhr && !hasFetch && haveSlice && checkTypeSupport('ms-stream')
+export var mozchunkedarraybuffer = haveXhr && !hasFetch && haveArrayBuffer &&
   checkTypeSupport('moz-chunked-arraybuffer')
-export var overrideMimeType = isFunction(xhr.overrideMimeType)
+export var overrideMimeType = haveXhr && isFunction(xhr.overrideMimeType)
 export var vbArray = isFunction(global.VBArray)
 
 function isFunction(value) {
